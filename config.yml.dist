@@ -1,0 +1,37 @@
+---
+listen_port: 8888
+repeater:
+    - VE3LSR-1:
+        callsign: VE3LSR
+        Sonsor: Lake Simcoe Repeater Assoc
+        Website: https://www.ve3lsr.ca
+        rxFreq: 146.850
+        txFreq: 146.250
+        offset: -0.6MHz
+        long: 11.000
+        lat: 11.000
+        services:
+            - allstar
+            - fm
+            - somethingelse
+        nets:
+            - procomm
+            - canwarn
+
+    - VE3LSR-2:
+        callsign: VE3LSR
+        rxFreq: 444.000
+        txFreq: 439.000
+        offset: "-"
+        long: 11.000
+        lat: 11.000
+        services:
+            - dmr
+asterisk:
+    - controller-1:
+        address: 127.0.0.1
+        user: someuser
+        password: somepass
+        nodes:
+            - 27311:
+                repeater: VE3LSR-1
