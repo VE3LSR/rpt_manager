@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='RPT Manager CLI')
     parser.add_argument('command', help="The command to run", choices=['getnodestat', 'sendnodecmd', 'nodestats'])
-    parser.add_argument('-n', '--node', dest='node', type=int, help="The Allstar Node")
+    parser.add_argument('-n', '--node', dest='node', type=int, help="The Allstar Node", action='append')
     parser.add_argument('--statcmd', dest='statcmd', help="The Stats command", choices=['XStat', 'SawStat', 'NodeStat', 'RptStat'], default='XStat')
     parser.add_argument('--cmd', dest='cmd', help="The command to run")
 
@@ -24,13 +24,16 @@ if __name__ == "__main__":
     # XStat
 
     if args.command == "getnodestat":
-        result = local_controller.getNodeStat(args.node, args.statcmd)
-        print (result)
+        for node in args.node:
+            result = local_controller.getNodeStat(node, args.statcmd)
+            print (result)
     elif args.command == "sendnodecmd":
-        result = local_controller.sendNodeCmd(args.node, args.cmd)
-        print (result)
+        for node in args.node:
+            result = local_controller.sendNodeCmd(node, args.cmd)
+            print (result)
     elif args.command == "nodestats":
-        result = local_controller.getNodeRptStat(args.node)
-        print (result['data'])
+        for node in args.node:
+            result = local_controller.getNodeRptStat(node)
+            print (result['data'])
 
     local_controller.stop()
