@@ -28,7 +28,7 @@ repeater:
         services:
             - dmr
 asterisk:
-    - controller-1:
+    controller-1:
         enabled: true
         address: 127.0.0.1
         user: someuser

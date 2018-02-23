@@ -60,11 +60,11 @@ class asteriskThread(threading.Thread):
 #            print (binascii.hexlify(data.encode()))
             buffer += data
             if buffer[-4:] == "\r\n\r\n": 
-                print ('Received from server:\r\n' + buffer)
+#                print ('Received from server:\r\n' + buffer)
                 # Find the ActionID
                 aid = re.search("ActionID: (\w+)", buffer)
                 if aid:
-                    print (aid.group(1))
+#                    print (aid.group(1))
                     self.result.put({'ActionID': aid.group(1), 'data':buffer})
                 else:
                     self.result.put({'data':buffer})
