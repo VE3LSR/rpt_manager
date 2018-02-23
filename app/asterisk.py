@@ -6,15 +6,18 @@ import select
 import random
 import time
 import re
+import logging
 from queue import Queue
 
 import binascii
 
 regx = re.compile ('^([^:\n]+): *(.*?) *\r$',re.MULTILINE)
 
+
 class asteriskThread(threading.Thread):
     def __init__(self, state, work, result, ip, port, user, password):
         threading.Thread.__init__(self)
+        self.logger = logging.getLogger('RPT_Manager_CLI')
         self.ip = ip
         self.port = port
         self.user = user
@@ -29,7 +32,7 @@ class asteriskThread(threading.Thread):
         # TODO: We should check to make sure the login worked
 
     def AsteriskConnect(self):
-        print ("Connecting...")
+        self.logger.debug ("Connecting...")
         self.mySocket.connect((self.ip, self.port))
         login = "ACTION: LOGIN\r\nUSERNAME: %s\r\nSECRET: %s\r\nEVENTS: OFF\r\n\r\n" % (self.user, self.password)
         self.mySocket.send(login.encode())
@@ -41,13 +44,13 @@ class asteriskThread(threading.Thread):
                 val = self.state.get()
                 if val == "quit":
                     self.mySocket.close()
-                    print ("Quiting")
+                    self.logger.debug ("Quiting")
                     break
             if not self.work.empty():
                 val = self.work.get()
                 self.mySocket.send(val.encode())
 
-            print ("Checking Socket")
+            self.logger.debug ("Checking Socket")
             r, w, e = select.select([self.mySocket],[],[],1.0)
             if r:
                 self.AsteriskRecv()
@@ -133,7 +136,8 @@ class asterisk():
             result = self.result.get(True)
             # Pull an item from the result queue - if it's ours, return it
             if 'ActionID' in result and result['ActionID'] == "Rptstat%s" % rnd:
-                # TODO: Parse the query
+                # Delete some lines we don't want
+                
                 return result
             else:
                 self.result.put(result)

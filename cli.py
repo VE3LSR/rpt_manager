@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
+import logging
 
 from app.allstar import allstar
 from app.asterisk import asterisk
 from app.config import config
+import app.log
 
 controller = 'controller-1'
+logger = app.log.setup_custom_logger('RPT_Manager_CLI')
 
 if __name__ == "__main__":
     config = config()
@@ -16,8 +19,12 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--node', dest='node', type=int, help="The Allstar Node", action='append')
     parser.add_argument('--statcmd', dest='statcmd', help="The Stats command", choices=['XStat', 'SawStat', 'NodeStat', 'RptStat'], default='XStat')
     parser.add_argument('--cmd', dest='cmd', help="The command to run")
+    parser.add_argument('-D', dest='debug', help="DEBUG Logging", action='store_true')
 
     args = parser.parse_args()
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
 
     values = config['asterisk'][controller]
     local_controller = asterisk(values['address'], values['port'], values['user'], values['password'])
