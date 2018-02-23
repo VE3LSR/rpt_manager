@@ -81,9 +81,9 @@ class asterisk():
     def stop(self):
         self.state.put("quit")
 
-    def sendNodeCmd(self, command):
+    def sendNodeCmd(self, node, command):
         rnd = random.randint(1,100000)
-        cmd = "ACTION: Command\r\nCOMMAND: %s\r\nActionID: nodeCmd%s\r\n\r\n" % (command, rnd)
+        cmd = "ACTION: Command\r\nCOMMAND: rpt fun %s %s\r\nActionID: nodeCmd%s\r\n\r\n" % (node, command, rnd)
         self.work.put(cmd)
         while True:
             result = self.result.get(True)
