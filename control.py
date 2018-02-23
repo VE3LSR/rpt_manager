@@ -33,7 +33,7 @@ if __name__ == "__main__":
     print (config)
 
     for controller in config['asterisk']:
-        controller, values = list(controller.items())[0]
+        values = config['asterisk'][controller]
         if 'enabled' in values and values['enabled']:
             print("Starting controller: %s" % controller)
             print("Values: %s" % values)
