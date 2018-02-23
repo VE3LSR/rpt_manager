@@ -10,6 +10,10 @@ class config:
                 print(exc)
                 sys.exit(0)
 
+        # TODO: Take config and build cross references
+        # Cross Reference NodeID to different controllers and repeaters
+        # Might be worth asking plugins todo this?
+
     def __getattr__(self, attr):
         return self.config[attr]
 
