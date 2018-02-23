@@ -10,6 +10,8 @@ from queue import Queue
 
 import binascii
 
+regx = re.compile ('^([^:\n]+): *(.*?) *\r$',re.MULTILINE)
+
 class asteriskThread(threading.Thread):
     def __init__(self, state, work, result, ip, port, user, password):
         threading.Thread.__init__(self)
@@ -79,19 +81,6 @@ class asterisk():
     def stop(self):
         self.state.put("quit")
 
-    def getNodeXStat(self, node):
-        rnd = random.randint(1,100000)
-        cmd = "ACTION: RptStatus\r\nCOMMAND: XStat\r\nNODE: %s\r\nActionID: xstat%s\r\n\r\n" % (node, rnd)
-        self.work.put(cmd)
-        while True:
-            result = self.result.get(True)
-            # Pull an item from the result queue - if it's ours, return it
-            if 'ActionID' in result and result['ActionID'] == "xstat%s" % rnd:
-                # TODO: Parse the query
-                return result
-            else:
-                self.result.put(result)
-
     def sendNodeCmd(self, command):
         rnd = random.randint(1,100000)
         cmd = "ACTION: Command\r\nCOMMAND: %s\r\nActionID: nodeCmd%s\r\n\r\n" % (command, rnd)
@@ -105,14 +94,39 @@ class asterisk():
             else:
                 self.result.put(result)
 
-    def getNodeSawStat(self, node):
+    def getNodeStat(self, node, stat="XStat"):
         rnd = random.randint(1,100000)
-        cmd = "ACTION: RptStatus\r\nCOMMAND: SawStat\r\nNODE: %s\r\nActionID: Sawstat%s\r\n\r\n" % (node, rnd)
+        cmd = "ACTION: RptStatus\r\nCOMMAND: %s\r\nNODE: %s\r\nActionID: %s%s\r\n\r\n" % (stat, node, stat, rnd)
         self.work.put(cmd)
         while True:
             result = self.result.get(True)
             # Pull an item from the result queue - if it's ours, return it
-            if 'ActionID' in result and result['ActionID'] == "Sawstat%s" % rnd:
+            if 'ActionID' in result and result['ActionID'] == "%s%s" % (stat, rnd):
+                # TODO: Parse the query
+                result_data={}
+                for data in regx.findall(result['data']):
+                    if data[0] == "Conn":
+                        if "conn" not in result_data:
+                            result_data['conn'] = []
+                        result_data['conn'].append(data[1])
+                    elif data[0] == "Var":
+                        if "var" not in result_data:
+                            result_data['var'] = []
+                        result_data['var'].append(data[1])
+                    else:
+                        result_data[data[0]] = data[1]
+                return result_data
+            else:
+                self.result.put(result)
+
+    def getNodeRptStat(self, node):
+        rnd = random.randint(1,100000)
+        cmd = "ACTION: Command\r\nCOMMAND: rpt stats %s\r\nActionID: Rptstat%s\r\n\r\n" % (node, rnd)
+        self.work.put(cmd)
+        while True:
+            result = self.result.get(True)
+            # Pull an item from the result queue - if it's ours, return it
+            if 'ActionID' in result and result['ActionID'] == "Rptstat%s" % rnd:
                 # TODO: Parse the query
                 return result
             else:
@@ -120,13 +134,28 @@ class asterisk():
 
 
 if __name__ == '__main__':
-    testA = asterisk("IP", Port, "USER", "PASS")
+    testA = asterisk(IP, Port, User, Pass)
     for i in range(1):
         print ("Sending Request")
-        result = testA.getNodeXStat(29133)
+
+        # XStat
+        result = testA.getNodeStat(29133)
         print (result)
-        result = testA.getNodeSawStat(29133)
+
+        # SawStat
+        result = testA.getNodeStat(29133, "SawStat")
         print (result)
+
+        # NodeStat
+        result = testA.getNodeStat(29133, "NodeStat")
+        print (result)
+
+        # RptStat
+        result = testA.getNodeStat(29133, "RptStat")
+        print (result)
+
+#        result = testA.getNodeRptStat(29133)
+#        print (result)
 #        result = testA.sendNodeCmd("rpt fun 29154 #81")
 #        print (result)
         time.sleep(2)
