@@ -102,17 +102,23 @@ class asterisk():
             result = self.result.get(True)
             # Pull an item from the result queue - if it's ours, return it
             if 'ActionID' in result and result['ActionID'] == "%s%s" % (stat, rnd):
-                # TODO: Parse the query
                 result_data={}
                 for data in regx.findall(result['data']):
+                    # TODO: 
                     if data[0] == "Conn":
+                        # SawStat (https://github.com/AllStarLink/Asterisk/blob/47426d0f0ef81a5c7d181424f5bf0526a353b47a/asterisk/apps/app_rpt.c#L24138)
+                        # 29372 0 342 340
+                        # NODE  Keyed LastKeyed(Seconds) LastUnKeyed(Seconds)
+
+                        # XStat (https://github.com/AllStarLink/Asterisk/blob/47426d0f0ef81a5c7d181424f5bf0526a353b47a/asterisk/apps/app_rpt.c#L24328)
+                        # 29372     208.80.98.29        0           IN         38:09:44            ESTABLISHED
+                        # Node      IP                  Reconnects  Direction  Connected           State
                         if "conn" not in result_data:
                             result_data['conn'] = []
                         result_data['conn'].append(data[1])
                     elif data[0] == "Var":
-                        if "var" not in result_data:
-                            result_data['var'] = []
-                        result_data['var'].append(data[1])
+                        k,v = data[1].split('=')
+                        result_data[k] = v
                     else:
                         result_data[data[0]] = data[1]
                 return result_data

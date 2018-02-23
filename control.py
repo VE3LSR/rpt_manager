@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 
-import yaml, sys, time
-
-import threading, socket
-
 import tornado.ioloop
 import tornado.web
 
 from app.allstar import allstar
 from app.asterisk import asterisk
+from app.config import config
 
 class MainHandler(tornado.web.RequestHandler):
 
@@ -23,12 +20,7 @@ def make_app():
     ])
 
 if __name__ == "__main__":
-    with open("config.yml", 'r') as stream:
-        try:
-            config = yaml.load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
-            sys.exit(0)
+    config = config()
 
     print (config)
 
