@@ -7,8 +7,8 @@ import threading, socket
 import tornado.ioloop
 import tornado.web
 
-from rptmgr.allstar import allstar
-from rptmgr.asterisk import asterisk
+from app.allstar import allstar
+from app.asterisk import asterisk
 
 class MainHandler(tornado.web.RequestHandler):
 
