@@ -14,12 +14,22 @@ logger = app.log.setup_custom_logger('RPT_Manager_CLI')
 if __name__ == "__main__":
     config = config()
 
-    parser = argparse.ArgumentParser(description='RPT Manager CLI')
-    parser.add_argument('command', help="The command to run", choices=['getnodestat', 'sendnodecmd', 'nodestats'])
-    parser.add_argument('-n', '--node', dest='node', type=int, help="The Allstar Node", action='append')
-    parser.add_argument('--statcmd', dest='statcmd', help="The Stats command", choices=['XStat', 'SawStat', 'NodeStat', 'RptStat'], default='XStat')
-    parser.add_argument('--cmd', dest='cmd', help="The command to run")
-    parser.add_argument('-D', dest='debug', help="DEBUG Logging", action='store_true')
+    node_parser = argparse.ArgumentParser(add_help=False)
+    node_parser.add_argument('-n', '--node', type=int, help="The Allstar Node", action='append', required=True)
+
+    debug_parser = argparse.ArgumentParser(add_help=False)
+    debug_parser.add_argument('-D', dest='debug', help="DEBUG Logging", action='store_true')
+
+    parser = argparse.ArgumentParser(description='RPT Manager CLI', parents=[debug_parser])
+    subparsers = parser.add_subparsers(dest='command')
+
+    parser_getnodestat = subparsers.add_parser('getnodestat', parents=[node_parser,debug_parser])
+    parser_getnodestat.add_argument('statcmd', help="The Stats command", choices=['XStat', 'SawStat', 'NodeStat', 'RptStat'], default='XStat')
+
+    parser_sendnodecmd = subparsers.add_parser('sendnodecmd', parents=[node_parser,debug_parser])
+    parser_sendnodecmd.add_argument('cmd', help="The command to run")
+
+    parser_nodestats = subparsers.add_parser('nodestats', parents=[node_parser,debug_parser])
 
     args = parser.parse_args()
 
@@ -42,5 +52,7 @@ if __name__ == "__main__":
         for node in args.node:
             result = local_controller.getNodeRptStat(node)
             print (result['data'])
+    else:
+        parser.print_help()
 
     local_controller.stop()
